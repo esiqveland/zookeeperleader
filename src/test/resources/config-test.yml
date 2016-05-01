@@ -1,0 +1,57 @@
+server:
+  applicationConnectors:
+  - type: http
+    port: 9000
+  adminConnectors:
+  - type: http
+    port: 9100
+  requestLog:
+    timeZone: "Europe/Oslo"
+    appenders:
+      - type: file
+        currentLogFilename: ./logs/robust-acccess.log
+        # Rolled over daily and retained for 30 days.
+        archivedLogFilenamePattern: ./logs/robust-access-%d.log.gz
+        archivedFileCount: 30
+        logFormat: "%-5level [RequestID: %X{requestID}] [%date] [%thread] %logger %message%n"
+
+httpClient:
+  maxConnections: 128
+  timeout: 10000ms
+  connectionTimeout: 10000ms
+  retries: 3
+  keepAlive: 5m
+
+#pingerHost: http://localhost:8089
+pingerHost: http://192.168.2.2:8080/
+
+logging:
+  level: INFO
+
+  loggers:
+    no.bekk.distsys: DEBUG
+
+  appenders:
+    - type: console
+      threshold: DEBUG
+      target: stdout
+      timeZone: CEST
+      logFormat: "%-5level [RequestID: %X{requestID}] [%date] [%thread] %logger %message%n"
+    # Log debug messages, info, warnings and errors to our apps' debug log.
+    # Rolled over hourly and retained for 6 hours
+    - type: file
+      threshold: DEBUG
+      currentLogFilename: ./logs/tl_auth-debug.log
+      archivedLogFilenamePattern: ./logs/tl_auth-debug-%d{yyyy-MM-dd-hh}.log.gz
+      archivedFileCount: 6
+      logFormat: "%-5level [RequestID: %X{requestID}] [%date] [%thread] %logger %message%n"
+
+    # Log info, warnings and errors to local logstash instance through udp
+    #  won't fail if logstash is not running
+#    - type: logstash-socket
+#      threshold: INFO
+#      host: 127.0.0.1
+#      port: 9001
+#      includeMdc: true
+#      customFields:
+#        application: tl_auth # change accordingly

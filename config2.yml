@@ -1,0 +1,35 @@
+server:
+  applicationConnectors:
+  - type: http
+    port: 9001
+  adminConnectors:
+  - type: http
+    port: 9101
+  requestLog:
+    timeZone: "Europe/Oslo"
+    appenders:
+      - type: file
+        currentLogFilename: ./logs/leaderapp-acccess.log
+        # Rolled over daily and retained for 30 days.
+        archivedLogFilenamePattern: ./logs/leaderapp-access-%d.log.gz
+        archivedFileCount: 30
+        logFormat: "%-5level [RequestID: %X{requestID}] [%date] [%thread] %logger %message%n"
+
+logging:
+  level: INFO
+
+  loggers:
+    no.bekk.distsys: DEBUG
+
+  appenders:
+    - type: console
+      target: stdout
+      timeZone: CEST
+      logFormat: "%-5level [RequestID: %X{requestID}] [%date] [%thread] %logger %message%n"
+    # Log debug messages, info, warnings and errors to our apps' debug log.
+    # Rolled over hourly and retained for 6 hours
+    - type: file
+      currentLogFilename: ./logs/leaderapp.log
+      archivedLogFilenamePattern: ./logs/leaderapp-%d{yyyy-MM-dd}.log.gz
+      archivedFileCount: 6
+      logFormat: "%-5level [RequestID: %X{requestID}] [%date] [%thread] %logger %message%n"
