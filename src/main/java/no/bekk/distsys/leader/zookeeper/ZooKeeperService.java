@@ -1,5 +1,6 @@
-package no.bekk.distsys.leader.dealer;
+package no.bekk.distsys.leader.zookeeper;
 
+import io.dropwizard.lifecycle.Managed;
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.WatchedEvent;
@@ -15,18 +16,15 @@ import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
 
-public class ZooKeeperService implements Watcher {
+public class ZooKeeperService implements Watcher, Managed {
     private static final Logger LOG = LoggerFactory.getLogger(ZooKeeperService.class);
 
     private ZooKeeper zooKeeper;
     private final ConcurrentLinkedQueue<ZKListener> listeners = new ConcurrentLinkedQueue<>();
     private final String url;
-    private Object ret;
 
     public ZooKeeperService(final String url) throws IOException {
         this.url = url;
-        zooKeeper = new ZooKeeper(url, (int) TimeUnit.SECONDS.toMillis(5), this);
-
     }
 
     public void addListener(ZKListener listener) {
@@ -103,7 +101,7 @@ public class ZooKeeperService implements Watcher {
                 break;
             case Expired:
                 listeners.forEach(ZKListener::Disconnected);
-                // TODO: not sure what to do yet. it's all over...
+                // TODO: not sure what to do yet. It's all over...
                 System.exit(-1);
                 break;
         }
@@ -111,14 +109,16 @@ public class ZooKeeperService implements Watcher {
             case None:
                 break;
             default:
-                listeners.forEach((listener) -> listener.Notify(event));
+                listeners.forEach(listener -> listener.Notify(event));
         }
     }
 
-    /**
-     * Caller must do stop() before exiting to make sure we shut down ZK connection properly.
-     * @throws Exception
-     */
+    @Override
+    public void start() throws Exception {
+        zooKeeper = new ZooKeeper(url, (int) TimeUnit.SECONDS.toMillis(5), this);
+    }
+
+    @Override
     public void stop() throws Exception {
         zooKeeper.close();
     }

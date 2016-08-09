@@ -1,10 +1,10 @@
 server:
   applicationConnectors:
   - type: http
-    port: 9000
+    port: 9002
   adminConnectors:
   - type: http
-    port: 9100
+    port: 9102
   requestLog:
     appenders:
       - type: file
@@ -38,7 +38,7 @@ logging:
     # Rolled over hourly and retained for 6 hours
     - type: file
       currentLogFilename: ./logs/robust-debug.log
-      archivedLogFilenamePattern: ./logs/robust-debug-%d{yyyy-MM-dd-hh}.log.gz
+      archivedLogFilenamePattern: ./logs/robust-debug-%d{yyyy-MM-dd}.log.gz
       archivedFileCount: 6
       logFormat: "%-5level [RequestID: %X{requestID}] [%date] [%thread] %logger %message%n"
 

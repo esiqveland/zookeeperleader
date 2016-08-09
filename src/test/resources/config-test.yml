@@ -6,7 +6,6 @@ server:
   - type: http
     port: 9100
   requestLog:
-    timeZone: "Europe/Oslo"
     appenders:
       - type: file
         currentLogFilename: ./logs/robust-acccess.log
@@ -22,8 +21,8 @@ httpClient:
   retries: 3
   keepAlive: 5m
 
-#pingerHost: http://localhost:8089
-pingerHost: http://192.168.2.2:8080/
+pingerHost: http://localhost:8089
+#pingerHost: http://192.168.2.2:8080/
 
 logging:
   level: INFO
@@ -33,16 +32,14 @@ logging:
 
   appenders:
     - type: console
-      threshold: DEBUG
       target: stdout
       timeZone: CEST
       logFormat: "%-5level [RequestID: %X{requestID}] [%date] [%thread] %logger %message%n"
     # Log debug messages, info, warnings and errors to our apps' debug log.
     # Rolled over hourly and retained for 6 hours
     - type: file
-      threshold: DEBUG
-      currentLogFilename: ./logs/tl_auth-debug.log
-      archivedLogFilenamePattern: ./logs/tl_auth-debug-%d{yyyy-MM-dd-hh}.log.gz
+      currentLogFilename: ./logs/robust-debug.log
+      archivedLogFilenamePattern: ./logs/robust-debug-%d{yyyy-MM-dd}.log.gz
       archivedFileCount: 6
       logFormat: "%-5level [RequestID: %X{requestID}] [%date] [%thread] %logger %message%n"
 

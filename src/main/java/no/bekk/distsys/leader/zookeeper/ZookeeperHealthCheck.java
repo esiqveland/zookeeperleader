@@ -1,4 +1,4 @@
-package no.bekk.distsys.leader.dealer;
+package no.bekk.distsys.leader.zookeeper;
 
 import com.codahale.metrics.health.HealthCheck;
 
