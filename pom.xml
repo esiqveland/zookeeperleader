@@ -202,28 +202,26 @@
             </exclusions>
         </dependency>
         <dependency>
-            <groupId>com.github.tomakehurst</groupId>
-            <artifactId>crash-lab</artifactId>
-            <version>0.2</version>
+            <groupId>com.smoketurner.dropwizard</groupId>
+            <artifactId>consul-core</artifactId>
+            <version>1.0.0-1</version>
+        </dependency>
+        <dependency>
+            <groupId>com.smoketurner.dropwizard</groupId>
+            <artifactId>consul-ribbon</artifactId>
+            <version>1.0.0-1</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/me.magnet/consultant -->
+        <dependency>
+            <groupId>me.magnet</groupId>
+            <artifactId>consultant</artifactId>
+            <version>1.6.0</version>
             <exclusions>
                 <exclusion>
-                    <groupId>com.fasterxml.jackson.core</groupId>
                     <artifactId>jackson-databind</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>com.google.guava</groupId>
-                    <artifactId>guava</artifactId>
-                </exclusion>
-                <exclusion>
                     <groupId>com.fasterxml.jackson.core</groupId>
-                    <artifactId>jackson-core</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>com.fasterxml.jackson.core</groupId>
-                    <artifactId>jackson-annotations</artifactId>
                 </exclusion>
             </exclusions>
-            <scope>test</scope>
         </dependency>
 
     </dependencies>

@@ -24,6 +24,18 @@ httpClient:
 pingerHost: http://localhost:8089
 #pingerHost: http://192.168.2.2:8080/
 
+consul:
+  # Optional properties
+  # endpoint for consul (defaults to localhost:8500)
+  endpoint: localhost:8500
+  # service port
+  servicePort: 9000
+  # service time to live
+  serviceTTL: 30 seconds
+  # check interval frequency
+  checkInterval: 1 second
+
+
 logging:
   level: INFO
 
