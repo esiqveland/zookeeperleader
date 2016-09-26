@@ -1,10 +1,10 @@
 server:
   applicationConnectors:
   - type: http
-    port: 9000
+    port: ${DW_PORT:-9000}
   adminConnectors:
   - type: http
-    port: 9100
+    port: ${DW_ADMIN_PORT:-9100}
   requestLog:
     appenders:
       - type: file
@@ -33,7 +33,7 @@ logging:
     - type: console
       target: stdout
       timeZone: CEST
-      logFormat: "%-5level [RequestID: %X{requestID}] [%date] [%thread] %logger %message%n"
+      logFormat: "%-5level [%date] [%thread] %logger %message%n"
     # Log debug messages, info, warnings and errors to our apps' debug log.
     # Rolled over hourly and retained for 6 hours
     - type: file
@@ -42,12 +42,3 @@ logging:
       archivedFileCount: 6
       logFormat: "%-5level [RequestID: %X{requestID}] [%date] [%thread] %logger %message%n"
 
-    # Log info, warnings and errors to local logstash instance through udp
-    #  won't fail if logstash is not running
-#    - type: logstash-socket
-#      threshold: INFO
-#      host: 127.0.0.1
-#      port: 9001
-#      includeMdc: true
-#      customFields:
-#        application: tl_auth # change accordingly

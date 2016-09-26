@@ -2,6 +2,7 @@ package no.bekk.distsys.leader.zookeeper;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.eventbus.EventBus;
+import javaslang.control.Try;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.zookeeper.WatchedEvent;
 import org.slf4j.Logger;
@@ -11,6 +12,9 @@ import javax.validation.constraints.NotNull;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * Class LeaderElector implements a leader election algorithm under ZK based primitives.
+ */
 public class LeaderElector implements ZKListener {
     private final Logger LOG = LoggerFactory.getLogger(this.getClass());
 
@@ -31,20 +35,21 @@ public class LeaderElector implements ZKListener {
      * you will have instances of dealer_123312321 under /leaders:
      * - /leaders/dealer_123312321
      * - /leaders/dealer_321551342
+     *
+     * The EventBus is for publishing changes in leadership in Events, See @LeaderEvent.
      **/
     public LeaderElector(EventBus bus, ZooKeeperService zkService, String root, String prefix) {
         this.ROOT = root;
         this.zkService = zkService;
         this.PREFIX = prefix;
         this.bus = bus;
+        zkService.addListener(this);
     }
 
     private void registerMe(ZooKeeperService zkService) {
         // make sure root node exists
-        try {
-            zkService.createNode(ROOT, false, false);
-        } catch (Exception e) {
-        }
+        Try.of(() -> zkService.createNode(ROOT, false, false))
+            .onFailure(throwable -> LOG.debug("Error creating ROOT node={}", ROOT, throwable));
 
         // register ourselves as a potential leader
         String myPath = zkService.createNode(buildPath(ROOT, PREFIX), false, true);

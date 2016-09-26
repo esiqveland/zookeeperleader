@@ -12,6 +12,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
@@ -21,21 +23,25 @@ public class ZooKeeperService implements Watcher, Managed {
 
     private ZooKeeper zooKeeper;
     private final ConcurrentLinkedQueue<ZKListener> listeners = new ConcurrentLinkedQueue<>();
-    private final String url;
+    private final URI url;
 
-    public ZooKeeperService(final String url) throws IOException {
-        this.url = url;
+    /** Creates a new ZooKeeperService. Remember to call .start() and .close()! */
+    public ZooKeeperService(final String url) throws IOException, URISyntaxException {
+        this.url = new URI(url);
     }
 
     public void addListener(ZKListener listener) {
         listeners.add(listener);
+
+        if (this.isAlive()) {
+            listener.Connected();
+        }
     }
 
     public String createNode(final String node, final boolean watch, final boolean ephemereal) {
         String createdNodePath = null;
 
         try {
-
             final Stat nodeStat = zooKeeper.exists(node, watch);
 
             if (nodeStat == null) {
@@ -115,7 +121,7 @@ public class ZooKeeperService implements Watcher, Managed {
 
     @Override
     public void start() throws Exception {
-        zooKeeper = new ZooKeeper(url, (int) TimeUnit.SECONDS.toMillis(5), this);
+        this.zooKeeper = new ZooKeeper(this.url.toString(), (int) TimeUnit.SECONDS.toMillis(5), this);
     }
 
     @Override
@@ -124,7 +130,7 @@ public class ZooKeeperService implements Watcher, Managed {
     }
 
     public boolean isAlive() {
-        return zooKeeper.getState().isAlive();
+        return zooKeeper != null && zooKeeper.getState().isAlive();
     }
 
     public ZooKeeper.States getState() {

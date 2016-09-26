@@ -2,7 +2,8 @@ package no.bekk.distsys.leader;
 
 import com.google.common.eventbus.EventBus;
 import io.dropwizard.Application;
-import io.dropwizard.lifecycle.Managed;
+import io.dropwizard.configuration.EnvironmentVariableSubstitutor;
+import io.dropwizard.configuration.SubstitutingSourceProvider;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import no.bekk.distsys.leader.dealer.DealerResource;
@@ -22,6 +23,11 @@ public class LeadingApplication extends Application<LeadingConfiguration> {
     @Override
     public void initialize(Bootstrap<LeadingConfiguration> bootstrap) {
         super.initialize(bootstrap);
+        // Enable variable substitution with environment variables
+        bootstrap.setConfigurationSourceProvider(new SubstitutingSourceProvider(
+                bootstrap.getConfigurationSourceProvider(),
+                new EnvironmentVariableSubstitutor(false)
+        ));
     }
 
     @Override
@@ -32,28 +38,20 @@ public class LeadingApplication extends Application<LeadingConfiguration> {
         ZooKeeperService zooKeeperService = new ZooKeeperService(config.getZooKeeper());
 
 
-        env.lifecycle().manage(new Managed() {
-            @Override
-            public void start() throws Exception {
-                zooKeeperService.start();
-            }
-
-            @Override
-            public void stop() throws Exception {
-                zooKeeperService.stop();
-            }
-        });
-
-
-        EventBus eventBus = new EventBus();
-
-
-        LeaderElector leaderElector = new LeaderElector(eventBus, zooKeeperService, "/leaders", "dealer_");
-        zooKeeperService.addListener(leaderElector);
+        /** We register this because of a DW hook to shutdown service on JVM exit.
+         *  This closes the ZK connection (kills the session)
+         *  so we don't have to wait 2 timeouts before the cluster can remove our session */
+        env.lifecycle().manage(zooKeeperService);
 
 
         DealerResource dealerResource = new DealerResource();
+
+        // We use the eventbus to publish election events
+        EventBus eventBus = new EventBus();
         eventBus.register(dealerResource);
+
+
+        LeaderElector leaderElector = new LeaderElector(eventBus, zooKeeperService, "/leaders", "dealer_");
 
 
         env.jersey().register(dealerResource);

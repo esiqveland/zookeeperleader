@@ -23,9 +23,7 @@ public class DealerResource {
     // Start with enabled to false so we dont start dealing numbers without being leader
     private AtomicBoolean isEnabled = new AtomicBoolean(false);
 
-    public DealerResource() {
-
-    }
+    public DealerResource() {}
 
     public synchronized void setEnabled(boolean enabled) {
         if (enabled) {
