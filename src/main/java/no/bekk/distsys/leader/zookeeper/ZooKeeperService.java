@@ -56,7 +56,7 @@ public class ZooKeeperService implements Watcher, Managed {
         return createdNodePath;
     }
 
-    public boolean watchNode(final String node, final boolean watch) {
+    public boolean exists(final String node, final boolean watch) {
         boolean watched = false;
         try {
             final Stat nodeStat = zooKeeper.exists(node, watch);

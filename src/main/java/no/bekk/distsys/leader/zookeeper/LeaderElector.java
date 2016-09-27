@@ -2,6 +2,7 @@ package no.bekk.distsys.leader.zookeeper;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.eventbus.EventBus;
+import javaslang.collection.List;
 import javaslang.control.Try;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.zookeeper.WatchedEvent;
@@ -9,8 +10,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.validation.constraints.NotNull;
-import java.util.Collections;
-import java.util.List;
 
 /**
  * Class LeaderElector implements a leader election algorithm under ZK based primitives.
@@ -71,16 +70,21 @@ public class LeaderElector implements ZKListener {
         }
     }
 
+    /**
+     * runLeaderElection does an election.
+     * returns true if successful election, false if election must be re-run for some reason.
+     */
     private synchronized boolean runLeaderElection(ZooKeeperService zkService) {
-        List<String> children = zkService.getChildren(ROOT, true);
-        Collections.sort(children);
+        List<String> children = List.ofAll(zkService.getChildren(ROOT, false))
+                .sorted();
+
 
         // There should be at least one node at this point, as we have already registered ourselves.
-        String leader = children.stream().findFirst().orElse("");
+        String leader = children.headOption().getOrElse("");
         LOG.info("me={} leader={} children={}", my_node, leader, children);
 
 
-        boolean isLeader = leader.equals(my_node);
+        boolean isLeader = StringUtils.equals(leader, my_node);
 
 
         if (isLeader) {
@@ -96,7 +100,7 @@ public class LeaderElector implements ZKListener {
             LOG.info("Creating watch on leader ahead of me={}", leaderAheadOfMe);
             String otherLeader = buildPath(ROOT, leaderAheadOfMe);
 
-            if (zkService.watchNode(otherLeader, true)) {
+            if (zkService.exists(otherLeader, true)) {
                 LOG.info("Watching leader={}", leaderAheadOfMe);
                 watchedLeader = leaderAheadOfMe;
                 return true;
